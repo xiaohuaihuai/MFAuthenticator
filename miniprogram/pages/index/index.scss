@@ -1,5 +1,5 @@
 /**index.wxss**/
-  .toolbar {
+.toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -7,32 +7,32 @@
     padding: 0 10px;
     background-color: #ffffff;
     color: #333333;
-  }
+}
 
-  .left {
+.left {
     display: flex;
     align-items: center;
-  }
+}
 
-  .center {
+.center {
     display: flex;
     align-items: center;
-  }
-  
-  .right {
+}
+
+.right {
     display: flex;
     align-items: center;
-  }
+}
 
-  .title {
+.title {
     font-size: 18px;
     font-weight: bold;
-  }
+}
 
-  .icon {
+.icon {
     width: 24px;
     height: 24px;
-  }
+}
 
 // Codes
 #codes {
@@ -44,93 +44,94 @@
     padding-right: 10px;
 
     .deleteAction {
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      z-index: 10;
-      display: none;
-    }
-  
-    &:hover {
-      overflow-y: scroll;
-    }
-  
-    &.edit {
-      .code {
-        color: #ccc !important;
-        user-select: none;
-        cursor: default;
-      }
-  
-      .issuer,
-      .showqr,
-      .showqr.hidden,
-      .pin,
-      .no-entry {
-        display: none;
-      }
-  
-      .issuerEdit,
-      .movehandle,
-      #add {
-        display: block;
-      }
-  
-      .deleteAction {
-        display: block;
-        cursor: pointer;
-      }
-  
-      .sector,
-      .counter {
         position: absolute;
-        left: -1000px;
-        opacity: 0;
-      }
+        top: -10px;
+        left: -10px;
+        z-index: 10;
+        display: none;
     }
-  
+
+    &:hover {
+        overflow-y: scroll;
+    }
+
+    &.edit {
+        .code {
+            color: #ccc !important;
+            user-select: none;
+            cursor: default;
+        }
+
+        .issuer,
+        .showqr,
+        .showqr.hidden,
+        .pin,
+        .no-entry {
+            display: none;
+        }
+
+        .issuerEdit,
+        .movehandle,
+        #add {
+            display: block;
+        }
+
+        .deleteAction {
+            display: block;
+            cursor: pointer;
+        }
+
+        .sector,
+        .counter {
+            position: absolute;
+            left: -1000px;
+            opacity: 0;
+        }
+    }
+
     &.filter .entry[filtered],
     &.search .entry[notSearched] {
-      height: 0;
-      margin: 0;
-      padding: 0;
-      opacity: 0;
-      border: none;
-      overflow: hidden;
-      position: absolute;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+        border: none;
+        overflow: hidden;
+        position: absolute;
     }
-  
+
     &.filter #filter,
     &.search #search {
-      display: block;
+        display: block;
     }
-  
+
     &:not(.edit) {
-      // Is this used?
-      .entry[unencrypted="true"]:hover .warning {
-        height: 24px;
-      }
-  
-      .code.timeout:not(.hotp) {
-        animation: twinkling 1s infinite ease-in-out;
-      }
+
+        // Is this used?
+        .entry[unencrypted="true"]:hover .warning {
+            height: 24px;
+        }
+
+        .code.timeout:not(.hotp) {
+            animation: twinkling 1s infinite ease-in-out;
+        }
     }
-  
+
     .no-entry {
-      color: grey;
-  
-      margin: 20px;
-      text-align: center;
-  
-      svg {
-        width: 48px;
-        height: 48px;
+        color: grey;
+
         margin: 20px;
-      }
+        text-align: center;
+
+        svg {
+            width: 48px;
+            height: 48px;
+            margin: 20px;
+        }
     }
-  }
-  
-  .entry {
+}
+
+.entry {
     margin: 10px;
     margin-right: 0;
     padding: 10px;
@@ -140,89 +141,89 @@
     position: relative;
     display: block;
     cursor: pointer;
-  
+
     .issuer {
-      font-size: 12px;
-      color: black;
-      width: 80%;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-  
-    .code {
-      font-size: 36px;
-      color: #08c;
-      width: 80%;
-      user-select: text;
-      font-family: "Droid Sans Mono";
-    }
-  
-    .sector,
-    .counter {
-      width: 20px;
-      height: 20px;
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-    }
-  
-    .sector,
-  
-    .counter {
-      text-align: center;
-      cursor: pointer;
-  
-      .disabled {
-        cursor: default;
-      }
-    }
-  
-    .issuerEdit {
-      display: none;
-  
-      input {
-        border: none;
-        height: 14px;
-        width: 70%;
         font-size: 12px;
-        outline: none;
-        background: #eee;
-      }
+        color: black;
+        width: 80%;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
-  
+
+    .code {
+        font-size: 36px;
+        color: #08c;
+        width: 80%;
+        user-select: text;
+        font-family: "Droid Sans Mono";
+    }
+
+    .sector,
+    .counter {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+    }
+
+    .sector,
+
+    .counter {
+        text-align: center;
+        cursor: pointer;
+
+        .disabled {
+            cursor: default;
+        }
+    }
+
+    .issuerEdit {
+        display: none;
+
+        input {
+            border: none;
+            height: 14px;
+            width: 70%;
+            font-size: 12px;
+            outline: none;
+            background: #eee;
+        }
+    }
+
     .movehandle {
-      height: 98px;
-      line-height: 98px;
-      right: 10px;
-      top: 0;
-      position: absolute;
-      cursor: move;
-      display: none;
+        height: 98px;
+        line-height: 98px;
+        right: 10px;
+        top: 0;
+        position: absolute;
+        cursor: move;
+        display: none;
     }
 
     .showqr,
-    
-    .showqr {
-      right: 10px;
-      top: 10px;
-      position: absolute;
-      cursor: pointer;
-    }
-  
-    &:hover {
-      .pin {
-        opacity: 1;
-      }
-  
-      .movehandle {
-        svg {
-            fill: black;
-        }
-      }
-    }
-  }
 
-  #qr {
+    .showqr {
+        right: 10px;
+        top: 10px;
+        position: absolute;
+        cursor: pointer;
+    }
+
+    &:hover {
+        .pin {
+            opacity: 1;
+        }
+
+        .movehandle {
+            svg {
+                fill: black;
+            }
+        }
+    }
+}
+
+#qr {
     width: 320px;
     height: 480px;
     top: -1000px;
@@ -232,18 +233,18 @@
     background-color: rgba(255, 255, 255, 0.5);
     background-repeat: no-repeat;
     background-position: center;
-  
+
     canvas {
-      display: none;
+        display: none;
     }
-  
+
     &.qrfadein {
-      top: 0;
-      animation: fadeshow 0.2s 1 ease-out;
+        top: 0;
+        animation: fadeshow 0.2s 1 ease-out;
     }
-  
+
     &.qrfadeout {
-      top: 0;
-      animation: fadehide 0.2s 1 ease-in;
+        top: 0;
+        animation: fadehide 0.2s 1 ease-in;
     }
-  }
+}

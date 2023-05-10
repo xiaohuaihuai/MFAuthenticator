@@ -1,0 +1,6 @@
+<!--setting.wxml-->
+<view class="container setting-list">
+  <block wx:for="{{settings}}" wx:key="{{index}}" wx:for-item="setting">
+    <text class="setting-item">{{index + 1}}. {{setting}}</text>
+  </block>
+</view>

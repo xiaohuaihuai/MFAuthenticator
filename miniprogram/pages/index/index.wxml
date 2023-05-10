@@ -1,49 +1,48 @@
 <!--index.wxml-->
-<view class="container">
-  <view class="toolbar">
-    <view class="left">
-        <image class="icon" src="/images/setting.png" />
-    </view>
-    <view class="center">
-        <text class="title">MFAuth</text>
-    </view>
-    <view class="right">
-        <image bindtap="scanCode" class="icon" src="/images/scan.png" />
-        <image class="icon" src="/images/edit.png" bindtap="handleEdit" />
-    </view>
-  </view>
-  <view class="content">
-    <view id="codes" class="{{ isEditing ? 'edit' : '' }}">
-      <view class="entry" wx:for="{{codes}}" wx:key="id">
-        <view class="deleteAction">
-            <image class="icon" src="/images/minus.png" bindtap="deleteCode" data-index="{{item.index}}"/>
+<view class="container" data-weui-theme="light">
+    <view class="toolbar">
+        <view class="left">
+            <image class="icon" src="/images/setting.png" bindtap="goToSettingPage" />
         </view>
-        <view bindtap="onCopyTap" data-code="{{item.code}}">
-            <view class="sector">
-                {{counter}}
+        <view class="center">
+            <text class="title">MFAuth</text>
+        </view>
+        <view class="right">
+            <image class="icon" src="/images/scan.png" bindtap="scanCode" hidden="{{isEditing}}" />
+            <!-- <image class="icon" src="/images/plus.png" hidden="{{isEditing}}" /> -->
+            <image class="icon" src="/images/edit.png" bindtap="handleEdit" hidden="{{isEditing}}" />
+            <image class="icon" src="/images/right.png" bindtap="confirmEdit" hidden="{{!isEditing}}" />
+        </view>
+    </view>
+    <view class="content">
+        <view id="codes" class="{{ isEditing ? 'edit' : '' }}">
+            <view class="entry" wx:for="{{codes}}" wx:key="index">
+                <view class="deleteAction">
+                    <image class="icon" src="/images/minus.png" bindtap="deleteCode" data-index="{{item.index}}" />
+                </view>
+                <view class="issuerEdit">
+                    <input type="text" value="{{ item.issuer }}" bindinput="onIssuerChange" data-index="{{item.index}}" />
+                </view>
+                <view bindtap="onCopyTap" data-code="{{item.code}}">
+                    <view class="sector">
+                        {{counter}}
+                    </view>
+                    <view class="issuer">{{item.issuer}}</view>
+                    <view class="code">{{item.code}}</view>
+                    <view class="issuer">{{item.label}}</view>
+                </view>
+                <view class="issuerEdit">
+                    <input type="text" value="{{ item.label }}" bindinput="onLabelChange" data-index="{{item.index}}" />
+                </view>
+                <view class="showqr">
+                    <image class="icon" src="/images/qrcode.png" bindtap="showQR" data-qrcodeurl="{{item.uri}}" />
+                </view>
+                <view class="movehandle">
+                    <image class="icon" src="/images/list.png" />
+                </view>
             </view>
-            <view class="issuer">{{item.issuer}}</view>
-            <view class="issuerEdit">
-                {{item.issuer}}
-            </view>
-            <view class="code">{{item.code}}</view>
-            <view class="issuer">{{item.username}}</view>
-            <view class="issuerEdit">
-                {{item.username}}
-            </view>
         </view>
-        <view class="showqr">
-            <image class="icon" src="/images/qrcode.png" bindtap="showQR" data-qrcodeurl="{{item.url}}"/>
+        <view id="qr" class="{{qrfade}}" style="background-image: url({{qrcodeBgImgUrl}})" bindtap="hideQR">
         </view>
-        <view class="movehandle">
-            <image class="icon" src="/images/list.png"/>
-        </view>
-      </view>
     </view>
-    <view id="qr" 
-        class="{{qrfade}}"
-        style="background-image: url({{qrcodeBgImgUrl}})"
-        bindtap="hideQR">
-    </view>
-  </view>
 </view>

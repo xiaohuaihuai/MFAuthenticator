@@ -1,5 +1,6 @@
 // index.ts
-import { generateOTP, KeyUriFormat } from '../../utils/otpUtils'
+import { KeyUriFormat } from '../../utils/otpUtils'
+import moment from 'moment';
 
 // 获取应用实例
 // const app = getApp<IAppOption>()
@@ -107,19 +108,11 @@ Page({
 
                 const uri = decodeURIComponent(res.result);
                 const keyUri = KeyUriFormat.fromUri(uri); // 'otpauth://totp/UPMS:yangqiuhua?secret=ELEUOFYQHZNTDOWK&issuer=UPMS'
-                const code = {
-                    "index": codes.length,
-                    "uri": uri,
-                    "type": keyUri.type,
-                    "label": keyUri.label,
-                    "secret": keyUri.secret,
-                    "issuer": keyUri.issuer,
-                    "algorithm": keyUri.algorithm,
-                    "digits": keyUri.digits,
-                    "counter": keyUri.counter,
-                    "period": keyUri.period,
-                    "code": ""
-                }
+                const code = keyUri.toJson();
+                var time = moment().format('YYYYMMDDHHmmssSSS');
+                code.index = time;
+                code.uri = uri, 
+                code.code = "";
 
                 codes.unshift(code)
                 wx.setStorageSync('codes', codes)
@@ -153,7 +146,8 @@ Page({
         })
         const qrcodeurl = e.currentTarget.dataset.qrcodeurl;
         this.setData({
-            qrcodeBgImgUrl: 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chld=L|0&chl=' + encodeURIComponent(qrcodeurl)
+            // qrcodeBgImgUrl: 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chld=L|0&chl=' + encodeURIComponent(qrcodeurl)
+            qrcodeBgImgUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrcodeurl)
         })
     },
     hideQR() {
@@ -194,9 +188,8 @@ Page({
         const codes = this.data.codes;
         for (let index in codes) {
             const codeItem = codes[index];
-            const code = generateOTP(codeItem.type, codeItem.label,
-                codeItem.secret, codeItem.issuer, codeItem.algorithm,
-                codeItem.digits, codeItem.counter, codeItem.period);
+            const keyUri = KeyUriFormat.fromJson(codeItem);
+            const code = keyUri.generateOTP();
             const key = 'codes[' + index + '].code'
             this.setData({
                 [key]: code

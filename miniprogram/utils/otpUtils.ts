@@ -1,18 +1,76 @@
 import CryptoJS from 'crypto-js';
 
-class KeyUtils {
-    public static dec2hex(s: number): string {
+export class KeyUriFormat {
+    type: string;
+    label: string;
+    secret: string;
+    issuer: string;
+    algorithm: string;
+    digits: number;
+    counter: number;
+    period: number;
+
+    constructor(type: string = 'totp', label: string,
+        secret: string, issuer: string, algorithm: string = 'SHA1',
+        digits: number = 6, counter: number = 0, period: number = 30) {
+        this.type = type;
+        this.label = label;
+        this.secret = secret;
+        this.issuer = issuer;
+        this.algorithm = algorithm;
+        this.digits = digits;
+        this.counter = counter;
+        this.period = period;
+    }
+
+    public generateOTP(): string {
+        let counter = Math.floor(new Date().getTime() / 1000 / this.period); // timeCounter 时间戳，以30秒为时间窗口
+        if (this.type === 'hotp') {
+            counter = this.counter; // eventCounter
+        }
+
+        const message = CryptoJS.enc.Hex.parse(this.leftpad(this.dec2hex(counter), 16, "0"));
+        const key = CryptoJS.enc.Hex.parse(this.base32tohex(this.secret)); // 将密钥转换成Base32格式
+
+        let hmac;
+        if (this.algorithm === 'SHA256') {
+            hmac = CryptoJS.HmacSHA256(message, key);
+        } else if (this.algorithm === 'SHA512') {
+            hmac = CryptoJS.HmacSHA512(message, key);
+        } else {
+            hmac = CryptoJS.HmacSHA1(message, key);
+        }
+
+        const code = this.truncate(hmac);
+        return this.padCode(code);
+    }
+
+    private padCode(code: string): string {
+        while (code.length < this.digits) {
+            code = '0' + code;
+        }
+        return code;
+    }
+
+    private truncate(hmac: CryptoJS.lib.WordArray): string {
+        const hex = hmac.toString(CryptoJS.enc.Hex);
+        const offset = parseInt(hex.charAt(hex.length - 1), 16);
+        const binary = ((parseInt(hex.substr(offset * 2, 8), 16) & 0x7fffffff) + "").substr(-this.digits) + "";
+        return binary;
+    }
+
+    private dec2hex(s: number): string {
         return (s < 15.5 ? "0" : "") + Math.round(s).toString(16);
     }
 
-    public static leftpad(str: string, len: number, pad: string): string {
+    private leftpad(str: string, len: number, pad: string): string {
         if (len + 1 >= str.length) {
             str = new Array(len + 1 - str.length).join(pad) + str;
         }
         return str;
     }
 
-    public static base32tohex(base32: string): string {
+    private base32tohex(base32: string): string {
         const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
         let bits = "";
         let hex = "";
@@ -57,29 +115,22 @@ class KeyUtils {
 
         return hex;
     }
-}
 
-export class KeyUriFormat {
-    type: string;
-    label: string;
-    secret: string;
-    issuer: string;
-    algorithm: string;
-    digits: number;
-    counter: number;
-    period: number;
-
-    constructor(type: string = 'totp', label: string,
-        secret: string, issuer: string, algorithm: string = 'SHA1',
-        digits: number = 6, counter: number, period: number) {
-        this.type = type;
-        this.label = label;
-        this.secret = secret;
-        this.issuer = issuer;
-        this.algorithm = algorithm;
-        this.digits = digits;
-        this.counter = counter;
-        this.period = period;
+    static fromJson(json: JSON): KeyUriFormat {
+        return new KeyUriFormat(json.type, json.label, json.secret, json.issuer, json.algorithm, json.digits, json.counter, json.period);
+      }
+    
+    toJson(): JSON {
+        return {
+            type: this.type,
+            label: this.label,
+            secret: this.secret,
+            issuer: this.issuer,
+            algorithm: this.algorithm,
+            digits: this.digits,
+            counter: this.counter,
+            period: this.period
+            };
     }
 
     static fromUri(uri: string): KeyUriFormat {
@@ -128,54 +179,4 @@ export class KeyUriFormat {
 
         return `otpauth://${this.type}/${this.label}?${parameters}`;
     }
-}
-
-export class OtpGenerator {
-    private keyUri: KeyUriFormat;
-
-    constructor(keyUri: KeyUriFormat) {
-        this.keyUri = keyUri;
-    }
-
-    public generateOTP(): string {
-        let counter = Math.floor(new Date().getTime() / 1000 / this.keyUri.period); // timeCounter 时间戳，以30秒为时间窗口
-        if (this.keyUri.type === 'hotp') {
-            counter = this.keyUri.counter; // eventCounter
-        }
-
-        const message = CryptoJS.enc.Hex.parse(KeyUtils.leftpad(KeyUtils.dec2hex(counter), 16, "0"));
-        const key = CryptoJS.enc.Hex.parse(KeyUtils.base32tohex(this.keyUri.secret)); // 将密钥转换成Base32格式
-
-        let hmac;
-        if (this.keyUri.algorithm === 'SHA256') {
-            hmac = CryptoJS.HmacSHA256(message, key);
-        } else if (this.keyUri.algorithm === 'SHA512') {
-            hmac = CryptoJS.HmacSHA512(message, key);
-        } else {
-            hmac = CryptoJS.HmacSHA1(message, key);
-        }
-
-        const code = this.truncate(hmac);
-        return this.padCode(code);
-    }
-
-    private padCode(code: string): string {
-        while (code.length < this.keyUri.digits) {
-            code = '0' + code;
-        }
-        return code;
-    }
-
-    private truncate(hmac: CryptoJS.lib.WordArray): string {
-        const hex = hmac.toString(CryptoJS.enc.Hex);
-        const offset = parseInt(hex.charAt(hex.length - 1), 16);
-        const binary = ((parseInt(hex.substr(offset * 2, 8), 16) & 0x7fffffff) + "").substr(-this.keyUri.digits) + "";
-        return binary;
-    }
-}
-
-export const generateOTP = (type: string = 'totp', label: string,
-    secret: string, issuer: string, algorithm: string = 'SHA1',
-    digits: number = 6, counter: number = 0, period: number = 30) => {
-    return new OtpGenerator(new KeyUriFormat(type, label, secret, issuer, algorithm, digits, counter, period)).generateOTP();
 }

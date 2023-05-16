@@ -1,6 +1,6 @@
-# MFAuthenticator <img align="right" width="100" height="100" src="https://github.com/xiaohuaihuai/MFAuthenticator/raw/main/miniprogram/images/icon128.png">
+# MFAuthenticator <img align="right" width="100" height="100" src="https://github.com/xiaohuaihuai/MFAuthenticator/raw/main/miniprogram/images/icon.png">
 
-> MFAuthenticator generates 2-Step Verification codes in your miniprogram.
+> MFAuthenticator generates 2-Step Verification codes in your Mini Program.
 
 ## Donate
 

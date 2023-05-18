@@ -36,7 +36,7 @@
 
 // Codes
 #codes {
-    min-height: 480px;
+    min-height: 520px;
     // height: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
@@ -72,6 +72,7 @@
 
         .issuerEdit,
         .movehandle,
+        .counterEdit,
         #add {
             display: block;
         }
@@ -79,6 +80,12 @@
         .deleteAction {
             display: block;
             cursor: pointer;
+        }
+
+        .refresh{
+            position: absolute;
+            left: -1000px;
+            opacity: 0;
         }
 
         .sector,
@@ -158,6 +165,14 @@
         font-family: "Droid Sans Mono";
     }
 
+    .refresh {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        right: 40px;
+        bottom: 12px;
+    }
+
     .sector,
     .counter {
         width: 20px;
@@ -168,11 +183,9 @@
     }
 
     .sector,
-
     .counter {
         text-align: center;
         cursor: pointer;
-
         .disabled {
             cursor: default;
         }
@@ -185,6 +198,22 @@
             border: none;
             height: 14px;
             width: 70%;
+            font-size: 12px;
+            outline: none;
+            background: #eee;
+        }
+    }
+
+    .counterEdit{
+        display: none;
+
+        input {
+            width: 20%;
+            height: 20px;
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            border: none;
             font-size: 12px;
             outline: none;
             background: #eee;
@@ -233,10 +262,6 @@
     background-color: rgba(255, 255, 255, 0.5);
     background-repeat: no-repeat;
     background-position: center;
-
-    canvas {
-        display: none;
-    }
 
     &.qrfadein {
         top: 0;

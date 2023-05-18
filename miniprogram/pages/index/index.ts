@@ -1,6 +1,6 @@
 // index.ts
-import { KeyUriFormat } from '../../utils/otpUtils'
-import moment from 'moment';
+import { KeyUriFormat, OtpRepository } from '../../utils/otpUtils'
+import qrcode from "qrcode-generator";
 
 // 获取应用实例
 // const app = getApp<IAppOption>()
@@ -11,33 +11,51 @@ Page({
         codes: [
 
         ],
-        counter: 0,
         qrfade: '',
-        qrcodeBgImgUrl: '',
-        userInfo: {},
-        hasUserInfo: false,
-        canIUse: wx.canIUse('button.open-type.getUserInfo'),
-        canIUseGetUserProfile: false,
-        canIUseOpenData: wx.canIUse('open-data.type.userAvatarUrl') && wx.canIUse('open-data.type.userNickName') // 如需尝试获取用户信息可改为false
+        qrcodeBgImgUrl: ''
     },
     onLoad() {
-        // @ts-ignore
-        if (wx.getUserProfile) {
-            this.setData({
-                canIUseGetUserProfile: true
-            })
-        }
-        let codes = wx.getStorageSync('codes') || []
-        this.setData({
-            codes: codes
-        })
-        this.autoRefreshCodes()
-        this.autoRefreshCounter()
+        this.refreshPage();
     },
-    // 事件处理函数
+    refreshPage(){
+        const codes = OtpRepository.listAll();
+        this.setData({codes: codes});
+
+        let totpCodes = OtpRepository.listByType('totp');
+        // 根据 period 字段进行分组
+        const groupedTotpCodes = totpCodes.reduce((result, item) => {
+            const period = item.period;
+            if (!result[period]) {
+                result[period] = [];
+            }
+            result[period].push(item);
+            return result;
+        }, {});
+        Object.entries(groupedTotpCodes).forEach(([period, codes]) => {
+            this.loopRefreshTotpCodes(codes, period);
+            this.loopRefreshTotpCounters(codes, period);
+        });
+    },
     goToSettingPage() {
         wx.navigateTo({
             url: '../setting/setting',
+        })
+    },
+    scanCode() {
+        const _this = this
+        wx.scanCode({
+            scanType: ['barCode', 'qrCode', 'datamatrix', 'pdf417'],
+            success(res) {
+                const uri = decodeURIComponent(res.result);
+                const keyUri = KeyUriFormat.fromUri(uri);
+                let code = keyUri.toJson();
+                code.uri = uri;
+                OtpRepository.save(code);
+                _this.refreshPage();
+            },
+            fail(err) {
+                console.log('scanCode fail: ', err)
+            }
         })
     },
     handleEdit() {
@@ -45,20 +63,14 @@ Page({
             isEditing: true
         })
     },
-    confirmEdit() {
-        wx.setStorageSync('codes', this.data.codes)
-        this.setData({
-            isEditing: false
-        })
-    },
     onIssuerChange(e: any) {
-        const index = e.currentTarget.dataset.index;
+        const id = e.currentTarget.dataset.id;
         const value = e.detail.value;
-        console.log('onIssuerChange', index, value);
+        console.log('onIssuerChange', id, value);
 
         let codes = this.data.codes;
         let newCodes = codes.map((item) => {
-            if (item.index === index) {
+            if (item.id === id) {
                 item.issuer = value;
                 return item;
             } else {
@@ -68,16 +80,15 @@ Page({
         this.setData({
             codes: newCodes
         })
-        this.refreshCodes();
     },
     onLabelChange(e: any) {
-        const index = e.currentTarget.dataset.index;
+        const id = e.currentTarget.dataset.id;
         const value = e.detail.value;
-        console.log('onLabelChange', index, value);
+        console.log('onLabelChange', id, value);
 
         let codes = this.data.codes;
         let newCodes = codes.map((item) => {
-            if (item.index === index) {
+            if (item.id === id) {
                 item.label = value;
                 return item;
             } else {
@@ -87,44 +98,35 @@ Page({
         this.setData({
             codes: newCodes
         })
-        this.refreshCodes();
     },
-    deleteCode(e: any) {
-        const index = e.currentTarget.dataset.index;
-        let codes = wx.getStorageSync('codes')
-        const newCodes = codes.filter((item: { index: any; }) => item.index !== index);
-        wx.setStorageSync('codes', newCodes)
+    onCounterChange(e: any) {
+        const id = e.currentTarget.dataset.id;
+        const value = e.detail.value;
+        console.log('onCounterChange', id, value);
+
+        let codes = this.data.codes;
+        let newCodes = codes.map((item) => {
+            if (item.id === id) {
+                item.counter = value;
+                return item;
+            } else {
+                return item;
+            }
+        });
         this.setData({
             codes: newCodes
         })
-        this.refreshCodes();
     },
-    scanCode() {
-        const _this = this
-        wx.scanCode({
-            scanType: ['barCode', 'qrCode', 'datamatrix', 'pdf417'],
-            success(res) {
-                let codes = _this.data.codes || []
-
-                const uri = decodeURIComponent(res.result);
-                const keyUri = KeyUriFormat.fromUri(uri); // 'otpauth://totp/UPMS:yangqiuhua?secret=ELEUOFYQHZNTDOWK&issuer=UPMS'
-                const code = keyUri.toJson();
-                var time = moment().format('YYYYMMDDHHmmssSSS');
-                code.index = time;
-                code.uri = uri, 
-                code.code = "";
-
-                codes.unshift(code)
-                wx.setStorageSync('codes', codes)
-                _this.setData({
-                    codes: codes
-                })
-                _this.refreshCodes();
-            },
-            fail(err) {
-                console.log('scanCode fail: ', err)
-            }
+    completeEdit() {
+        OtpRepository.updateByIds(this.data.codes);
+        this.setData({
+            isEditing: false
         })
+    },
+    deleteCode(e: any) {
+        const id = e.currentTarget.dataset.id;
+        OtpRepository.removeById(id);
+        this.refreshPage();
     },
     onCopyTap(e: any) {
         var textToCopy = e.currentTarget.dataset.code;
@@ -143,12 +145,19 @@ Page({
     showQR(e: any) {
         this.setData({
             qrfade: 'qrfadein'
-        })
+        });
         const qrcodeurl = e.currentTarget.dataset.qrcodeurl;
+        // this.setData({
+        //     // qrcodeBgImgUrl: 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chld=L|0&chl=' + encodeURIComponent(qrcodeurl)
+        //     qrcodeBgImgUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrcodeurl)
+        // })
+        const qr = qrcode(0, "L");
+        qr.addData(encodeURIComponent(qrcodeurl));
+        qr.make();
+        const qrcodeBgImgUrl = qr.createDataURL(5);
         this.setData({
-            // qrcodeBgImgUrl: 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chld=L|0&chl=' + encodeURIComponent(qrcodeurl)
-            qrcodeBgImgUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrcodeurl)
-        })
+            qrcodeBgImgUrl: qrcodeBgImgUrl
+        });
     },
     hideQR() {
         var _this = this;
@@ -161,60 +170,73 @@ Page({
             })
         }, 200);
     },
-    autoRefreshCounter() {
-        const now = new Date() // 获取当前时间
-        const seconds = now.getSeconds() // 获取当前秒数
-        let counter = 30 - seconds % 30;
-        if (counter === 30) counter = 0; // 计数器从0开始
-
-        this.setData({
-            counter: counter
-        })
-        setTimeout(this.autoRefreshCounter, 1000);
-    },
-    autoRefreshCodes() {
+    async loopRefreshTotpCounters(codes: Array<JSON>, period: number) {
         var _this = this;
         var now = new Date();
         var seconds = now.getSeconds();
-        var delay = (30 - seconds % 30) * 1000; // 延时到下一个30秒
+        let counter = period - seconds % period;
+        if (counter === period) counter = 0; // 计数器从0开始
 
-        _this.refreshCodes();
-        setTimeout(function () {
-            setInterval(_this.refreshCodes, 30000); // 每隔30秒调用函数
+        let newCodes = codes.map((item) => {
+            item.counter = counter;
+            return item;
+        });
+        _this.refreshCounters(newCodes);
+        setTimeout(() =>  {
+            _this.loopRefreshTotpCounters(codes, period);
+        }, 1000);
+    },
+    async loopRefreshTotpCodes(codes: Array<JSON>, period: number) {
+        var _this = this;
+        var now = new Date();
+        var seconds = now.getSeconds();
+        var delay = (period - seconds % period) * 1000; // 延时到下一个period(30)秒
+
+        _this.refreshCodes(codes);
+
+        setTimeout(() =>  {
+            setInterval(() => {
+                _this.loopRefreshTotpCodes(codes, period);
+            }, period * 1000); // 每隔period(30)秒调用函数
         }, delay);
     },
-    refreshCodes() {
-        // 展示本地存储能力
+    async refreshCodes(targetCodes: Array<JSON>) {
+        for (const targetCode of targetCodes) {
+            this.refreshCode(targetCode);
+        }
+    },
+    async refreshCode(targetCode: JSON) {
         const codes = this.data.codes;
         for (let index in codes) {
             const codeItem = codes[index];
-            const keyUri = KeyUriFormat.fromJson(codeItem);
-            const code = keyUri.generateOTP();
-            const key = 'codes[' + index + '].code'
-            this.setData({
-                [key]: code
-            })
+            if (targetCode.id == codeItem.id) {
+                const keyUri = KeyUriFormat.fromJson(codeItem);
+                const codeValue = keyUri.generateOTP();
+                const codeKey = 'codes[' + index + '].code'
+                this.setData({[codeKey]: codeValue});
+            }
         }
     },
-    getUserProfile() {
-        // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-        wx.getUserProfile({
-            desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-            success: (res) => {
-                console.log(res)
-                this.setData({
-                    userInfo: res.userInfo,
-                    hasUserInfo: true
-                })
-            }
-        })
+    async refreshCounters(targetCodes: Array<JSON>) {
+        for (const targetCode of targetCodes) {
+            this.refreshCounter(targetCode);
+        }
     },
-    getUserInfo(e: any) {
-        // 不推荐使用getUserInfo获取用户信息，预计自2021年4月13日起，getUserInfo将不再弹出弹窗，并直接返回匿名的用户个人信息
-        console.log(e)
-        this.setData({
-            userInfo: e.detail.userInfo,
-            hasUserInfo: true
-        })
+    async refreshCounter(targetCode: JSON) {
+        const codes = this.data.codes;
+        for (let index in codes) {
+            const codeItem = codes[index];
+            if (targetCode.id == codeItem.id) {
+                const counterKey = 'codes[' + index + '].counter'
+                this.setData({[counterKey]: targetCode.counter});
+            }
+        }
+    },
+    onRefreshCodeTap(e: any) {
+        const code = e.currentTarget.dataset.code;
+        code.counter++;
+        this.refreshCode(code);
+        this.refreshCounter(code);
+        OtpRepository.updateById(code);
     }
 })

@@ -1,14 +1,20 @@
 {
-  "name": "miniprogram-ts-less-quickstart",
-  "version": "1.0.0",
-  "description": "",
+  "name": "mfauthenticator",
+  "version": "1.0.3",
+  "description": "MFAuthenticator generates 2-Step Verification codes in your Mini Program.",
   "scripts": {},
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "miniprogram",
+    "mfa",
+    "2fa",
+    "authenticator"
+  ],
+  "author": "victor",
   "license": "",
   "dependencies": {
     "crypto-js": "^4.1.1",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "qrcode-generator": "^1.4.4"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",

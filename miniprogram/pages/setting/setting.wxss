@@ -1,8 +1,0 @@
-.setting-list {
-  display: flex;
-  flex-direction: column;
-  padding: 40rpx;
-}
-.setting-item {
-  margin: 10rpx;
-}

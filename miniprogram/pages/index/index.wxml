@@ -11,31 +11,37 @@
             <image class="icon" src="/images/scan.png" bindtap="scanCode" hidden="{{isEditing}}" />
             <!-- <image class="icon" src="/images/plus.png" hidden="{{isEditing}}" /> -->
             <image class="icon" src="/images/edit.png" bindtap="handleEdit" hidden="{{isEditing}}" />
-            <image class="icon" src="/images/right.png" bindtap="confirmEdit" hidden="{{!isEditing}}" />
+            <image class="icon" src="/images/right.png" bindtap="completeEdit" hidden="{{!isEditing}}" />
         </view>
     </view>
     <view class="content">
         <view id="codes" class="{{ isEditing ? 'edit' : '' }}">
-            <view class="entry" wx:for="{{codes}}" wx:key="index">
+            <view class="entry" wx:for="{{codes}}" wx:key="id">
                 <view class="deleteAction">
-                    <image class="icon" src="/images/minus.png" bindtap="deleteCode" data-index="{{item.index}}" />
+                    <image class="icon" src="/images/minus.png" bindtap="deleteCode" data-id="{{item.id}}" />
                 </view>
                 <view class="issuerEdit">
-                    <input type="text" value="{{ item.issuer }}" bindinput="onIssuerChange" data-index="{{item.index}}" />
+                    <input type="text" value="{{ item.issuer }}" bindinput="onIssuerChange" data-id="{{item.id}}" />
                 </view>
                 <view bindtap="onCopyTap" data-code="{{item.code}}">
                     <view class="sector">
-                        {{counter}}
+                        {{item.counter}}
                     </view>
                     <view class="issuer">{{item.issuer}}</view>
-                    <view class="code">{{item.code}}</view>
+                    <view class="code">{{item.code?item.code:'••••••'}}</view>
                     <view class="issuer">{{item.label}}</view>
                 </view>
                 <view class="issuerEdit">
-                    <input type="text" value="{{ item.label }}" bindinput="onLabelChange" data-index="{{item.index}}" />
+                    <input type="text" value="{{ item.label }}" bindinput="onLabelChange" data-id="{{item.id}}" />
                 </view>
                 <view class="showqr">
                     <image class="icon" src="/images/qrcode.png" bindtap="showQR" data-qrcodeurl="{{item.uri}}" />
+                </view>
+                <view class="refresh" wx:if="{{item.type == 'hotp'}}">
+                    <image class="icon" src="/images/refresh.png" bindtap="onRefreshCodeTap" data-code="{{item}}" />
+                </view>
+                <view class="counterEdit" wx:if="{{item.type == 'hotp'}}">
+                    <input type="text" value="{{ item.counter }}" bindinput="onCounterChange" data-id="{{item.id}}" />
                 </view>
                 <view class="movehandle">
                     <image class="icon" src="/images/list.png" />

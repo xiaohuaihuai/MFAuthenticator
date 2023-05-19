@@ -25,4 +25,4 @@ If you find this project useful, you can buy author a glass of juice :tropical_d
 
 ![donate](https://github.com/xiaohuaihuai/MFAuthenticator/raw/main/miniprogram/images/WechatAppreciationCode.jpeg)
 
-[Buy me a coffee](https://www.buymeacoffee.com/xxx)
+[Buy me a coffee](https://www.buymeacoffee.com/xiaohuaihuai)

@@ -9,6 +9,15 @@
         <view class="menuList">
             <view class="menuItem" bindtap="goToSourcecodePage">源代码</view>
         </view>
+
+        <view class="menuList">
+            <view class="menuItem">
+            ‼️重要提示：
+            本小程序不存储任何信息，只有手机本地存储，
+            为避免更新微信或者小程序时丢失数据，
+            请自行导出二维码并截图备份账号。
+            </view>
+        </view>
         <view id="version">Version 1.0.4</view>
     </view>
     <view id="qr" class="{{qrfade}}" style="background-image: url({{qrcodeBgImgUrl}})" bindtap="hideQR">

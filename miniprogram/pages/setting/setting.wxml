@@ -3,7 +3,7 @@
     <view id="menuBody">
         <view class="menuList">
             <view class="menuItem" bindtap="export">导出</view>
-            <view class="menuItem" bindtap="import">导入</view>
+            <view class="menuItem" bindtap="import">导入（支持GoogleAuthenticator）</view>
         </view>
 
         <view class="menuList">

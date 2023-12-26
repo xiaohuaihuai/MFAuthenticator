@@ -1,5 +1,7 @@
 // setting.ts
-import { KeyUriFormat, OtpRepository } from '../../utils/otpUtils'
+import { OtpRepository } from '../../utils/otp-repository'
+import { KeyUriFormat } from '../../utils/otpauth'
+import * as URI from "../../utils/otpauth-migration";
 import qrcode from "qrcode-generator";
 
 Page({
@@ -18,11 +20,25 @@ Page({
         const codes = OtpRepository.listAll();
         const uriArray = codes.map(item => item.uri);
         const uris = uriArray.join(',');
+        const otpAuthMigrationURI = URI.toOTPAuthMigrationURI(uriArray);
+        console.log("export otpauth-migration:{}", otpAuthMigrationURI)
 
+        /**
+            qrcode(typeNumber, errorCorrectionLevel) 
+            Param	Type	Description
+            typeNumber	number	Type number (1 ~ 40), or 0 for auto detection.
+            errorCorrectionLevel	string	Error correction level ('L', 'M', 'Q', 'H')
+         */
         const qr = qrcode(0, "L");
-        qr.addData(encodeURIComponent(uris));
+        qr.addData(otpAuthMigrationURI);
         qr.make();
-        const qrcodeBgImgUrl = qr.createDataURL(4, 4);
+        /**
+            createDataURL(cellSize, margin)
+            Param	Type	Description
+            cellSize	number	default: 2
+            margin	number	default: cellSize * 4
+         */
+        const qrcodeBgImgUrl = qr.createDataURL(3, 12);
         this.setData({
             qrcodeBgImgUrl: qrcodeBgImgUrl
         })
@@ -45,10 +61,23 @@ Page({
                 const uris = decodeURIComponent(res.result);
                 const uriArray = uris.split(',');
                 for (const uri of uriArray) {
-                    const keyUri = KeyUriFormat.fromUri(uri);
-                    let code = keyUri.toJson();
-                    code.uri = uri;
-                    OtpRepository.save(code);
+                    if (uri.startsWith("otpauth-migration:")) {
+                        console.log("import otpauth-migration:{}", uri)
+                        const otpAuthURIs = URI.toOTPAuthURIs(uri);
+                        console.log("import otpAuthURIs:{}",otpAuthURIs)
+                        for (const otpAuthURI of otpAuthURIs) {
+                            const keyUri = KeyUriFormat.fromUri(otpAuthURI);
+                            let code = keyUri.toJson();
+                            code.uri = otpAuthURI;
+                            OtpRepository.save(code);
+                        }
+                    }
+                    if (uri.startsWith("otpauth:")) {
+                        const keyUri = KeyUriFormat.fromUri(uri);
+                        let code = keyUri.toJson();
+                        code.uri = uri;
+                        OtpRepository.save(code);
+                    }
                 }
                 wx.navigateTo({
                     url: '../index/index'

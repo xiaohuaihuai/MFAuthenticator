@@ -1,5 +1,7 @@
 // index.ts
-import { KeyUriFormat, OtpRepository } from '../../utils/otpUtils'
+import { OtpRepository } from '../../utils/otp-repository'
+import { KeyUriFormat } from '../../utils/otpauth'
+import * as URI from "../../utils/otpauth-migration";
 import qrcode from "qrcode-generator";
 
 // 获取应用实例
@@ -47,10 +49,23 @@ Page({
             scanType: ['barCode', 'qrCode', 'datamatrix', 'pdf417'],
             success(res) {
                 const uri = decodeURIComponent(res.result);
-                const keyUri = KeyUriFormat.fromUri(uri);
-                let code = keyUri.toJson();
-                code.uri = uri;
-                OtpRepository.save(code);
+                if (uri.startsWith("otpauth-migration:")) {
+                    console.log("scanCode otpauth-migration:{}",uri)
+                    const otpAuthURIs = URI.toOTPAuthURIs(uri);
+                    console.log("scanCode otpAuthURIs:{}",otpAuthURIs)
+                    for (const otpAuthURI of otpAuthURIs) {
+                        const keyUri = KeyUriFormat.fromUri(otpAuthURI);
+                        let code = keyUri.toJson();
+                        code.uri = otpAuthURI;
+                        OtpRepository.save(code);
+                    }
+                } 
+                if (uri.startsWith("otpauth:"))  {
+                    const keyUri = KeyUriFormat.fromUri(uri);
+                    let code = keyUri.toJson();
+                    code.uri = uri;
+                    OtpRepository.save(code);
+                }
                 _this.refreshPage();
             },
             fail(err) {

@@ -116,7 +116,7 @@ function toOTPAuthURIs(migrationUri: string) {
     ];
     let line = `otpauth://${type}/${account}?secret=${secret}&issuer=${issuer}&algorithm=${algorithm}&digits=${digits}`;
     if (type === "hotp") {
-      let counter = 1;
+      let counter = 0;
       if (isserStart + isserLength + 7 <= lineLength) {
         counter = byteData[isserStart + isserLength + 7];
       }

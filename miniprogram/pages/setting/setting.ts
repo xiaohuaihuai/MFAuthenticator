@@ -58,26 +58,23 @@ Page({
         wx.scanCode({
             scanType: ['barCode', 'qrCode', 'datamatrix', 'pdf417'],
             success(res) {
-                const uris = decodeURIComponent(res.result);
-                const uriArray = uris.split(',');
-                for (const uri of uriArray) {
-                    if (uri.startsWith("otpauth-migration:")) {
-                        console.log("import otpauth-migration:{}", uri)
-                        const otpAuthURIs = URI.toOTPAuthURIs(uri);
-                        console.log("import otpAuthURIs:{}",otpAuthURIs)
-                        for (const otpAuthURI of otpAuthURIs) {
-                            const keyUri = KeyUriFormat.fromUri(otpAuthURI);
-                            let code = keyUri.toJson();
-                            code.uri = otpAuthURI;
-                            OtpRepository.save(code);
-                        }
-                    }
-                    if (uri.startsWith("otpauth:")) {
-                        const keyUri = KeyUriFormat.fromUri(uri);
+                const uri = decodeURIComponent(res.result);
+                if (uri.startsWith("otpauth-migration:")) {
+                    console.log("import otpauth-migration:{}", uri)
+                    const otpAuthURIs = URI.toOTPAuthURIs(uri);
+                    console.log("import otpAuthURIs:{}",otpAuthURIs)
+                    for (const otpAuthURI of otpAuthURIs) {
+                        const keyUri = KeyUriFormat.fromUri(otpAuthURI);
                         let code = keyUri.toJson();
-                        code.uri = uri;
+                        code.uri = otpAuthURI;
                         OtpRepository.save(code);
                     }
+                }
+                if (uri.startsWith("otpauth:")) {
+                    const keyUri = KeyUriFormat.fromUri(uri);
+                    let code = keyUri.toJson();
+                    code.uri = uri;
+                    OtpRepository.save(code);
                 }
                 wx.navigateTo({
                     url: '../index/index'

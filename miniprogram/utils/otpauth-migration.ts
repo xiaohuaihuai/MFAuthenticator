@@ -66,45 +66,6 @@ function toOTPAuthURIs(migrationUri: string) {
   const payload:Payload = Payload.deserializeBinary(uint8Array);
   const lines = payload.otp_parameters.map(otpParameterToLine);
   return lines;
-//   const byteData = wordArrayToByteArray(wordArrayData);
-//   const lines: string[] = [];
-//   let offset = 0;
-//   while (offset < byteData.length) {
-//     if (byteData[offset] !== 10) {
-//       break;
-//     }
-//     const lineLength = byteData[offset + 1];
-//     const secretStart = offset + 4;
-//     const secretLength = byteData[offset + 3];
-//     const secretBytes = subByteArray(byteData, secretStart, secretLength);
-//     const secret = byteArrayToBase32(secretBytes);
-//     const accountStart = secretStart + secretLength + 2;
-//     const accountLength = byteData[secretStart + secretLength + 1];
-//     const accountBytes = subByteArray(byteData, accountStart, accountLength);
-//     const account = byteArrayToString(accountBytes);
-//     const isserStart = accountStart + accountLength + 2;
-//     const isserLength = byteData[accountStart + accountLength + 1];
-//     const issuerBytes = subByteArray(byteData, isserStart, isserLength);
-//     const issuer = byteArrayToString(issuerBytes);
-//     const algorithm = ["SHA1", "SHA1", "SHA256", "SHA512", "MD5"][
-//       byteData[isserStart + isserLength + 1]
-//     ];
-//     const digits = [6, 6, 8][byteData[isserStart + isserLength + 3]];
-//     const type = ["totp", "hotp", "totp"][
-//       byteData[isserStart + isserLength + 5]
-//     ];
-//     let line = `otpauth://${type}/${account}?secret=${secret}&issuer=${issuer}&algorithm=${algorithm}&digits=${digits}`;
-//     if (type === "hotp") {
-//       let counter = 0;
-//       if (isserStart + isserLength + 7 <= lineLength) {
-//         counter = byteData[isserStart + isserLength + 7];
-//       }
-//       line += `&counter=${counter}`;
-//     }
-//     lines.push(line);
-//     offset += lineLength + 2;
-//   }
-//   return lines;
 }
 
 function toOTPAuthMigrationURI(lines: string[]) {

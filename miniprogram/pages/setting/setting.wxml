@@ -2,7 +2,7 @@
 <view class="container">
     <view id="menuBody">
         <view class="menuList">
-            <view class="menuItem" bindtap="export">导出</view>
+            <view class="menuItem" bindtap="export">导出（支持GoogleAuthenticator）</view>
             <view class="menuItem" bindtap="import">导入（支持GoogleAuthenticator）</view>
         </view>
 
@@ -18,7 +18,7 @@
             请自行导出二维码并截图备份账号。
             </view>
         </view>
-        <view id="version">Version 1.0.4</view>
+        <view id="version">Version 1.0.5</view>
     </view>
     <view id="qr" class="{{qrfade}}" style="background-image: url({{qrcodeBgImgUrl}})" bindtap="hideQR">
     </view>

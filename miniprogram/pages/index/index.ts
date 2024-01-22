@@ -43,6 +43,11 @@ Page({
             url: '../setting/setting',
         })
     },
+    goToAddPage() {
+        wx.navigateTo({
+            url: '../add/add',
+        })
+    },
     scanCode() {
         const _this = this
         wx.scanCode({

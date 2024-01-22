@@ -9,7 +9,7 @@
         </view>
         <view class="right">
             <image class="icon" src="/images/scan.png" bindtap="scanCode" hidden="{{isEditing}}" />
-            <!-- <image class="icon" src="/images/plus.png" hidden="{{isEditing}}" /> -->
+            <image class="icon" src="/images/plus.png" bindtap="goToAddPage" hidden="{{isEditing}}" />
             <image class="icon" src="/images/edit.png" bindtap="handleEdit" hidden="{{isEditing}}" />
             <image class="icon" src="/images/right.png" bindtap="completeEdit" hidden="{{!isEditing}}" />
         </view>

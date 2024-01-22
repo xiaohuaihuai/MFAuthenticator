@@ -37,7 +37,9 @@ export class KeyUriFormat {
             hmac = CryptoJS.HmacSHA256(message, key);
         } else if (this.algorithm === 'SHA512') {
             hmac = CryptoJS.HmacSHA512(message, key);
-        } else {
+        } else if (this.algorithm === 'MD5') {
+            hmac = CryptoJS.MD5(message, key);
+        }  else {
             hmac = CryptoJS.HmacSHA1(message, key);
         }
 
